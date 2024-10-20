@@ -1,5 +1,6 @@
-import numpy as np
-from PIL import Image, ImageDraw
+from wand.image import Image
+from wand.drawing import Drawing
+from wand.color import Color
 import random
 import math
 
@@ -11,9 +12,9 @@ def create_star_field(image_size=(2560, 1440), num_stars=200, cluster_ratio_rang
     print(f"Cluster ratio: {cluster_ratio:.2f}, Number of clusters: {num_clusters}")
     
     # Create a transparent background
-    image = Image.new("RGBA", image_size, (0, 0, 0, 0))
-    draw = ImageDraw.Draw(image)
-    
+    image = Image(width=image_size[0], height=image_size[1], background=Color("transparent"))
+    draw = Drawing()
+
     # Number of stars that belong to clusters
     num_cluster_stars = int(num_stars * cluster_ratio)
     num_random_stars = num_stars - num_cluster_stars
@@ -55,12 +56,18 @@ def create_star_field(image_size=(2560, 1440), num_stars=200, cluster_ratio_rang
         # Make sure the star is within bounds
         if 0 <= x < image_size[0] and 0 <= y < image_size[1]:
             draw_star(draw, x, y)
-
+    
     # Draw uniformly random stars
     for _ in range(num_random_stars):
         x = random.randint(0, image_size[0] - 1)
         y = random.randint(0, image_size[1] - 1)
         draw_star(draw, x, y)
+
+    # Apply the drawing to the image
+    draw(image)
+    
+    # Clean up the draw object
+    draw.clear()
     
     return image
 
@@ -68,22 +75,17 @@ def draw_star(draw, x, y):
     """Helper function to draw an irregular, misshaped star"""
     # Random brightness for the star (200-255 for white stars)
     brightness = random.randint(200, 255)
+    star_color = Color(f'rgba({brightness}, {brightness}, {brightness}, 1.0)')
 
     # Generate random size for the star to create misshaping effect
-    width = random.randint(1, 3)
-    height = random.randint(1, 3)
+    radius_x = random.random()*2  # Horizontal radius
+    radius_y = random.random()*2  # Vertical radius
 
-    x_offset = random.randint(-1, 1)
-    y_offset = random.randint(-1, 1)
+    x_offset = random.random()*.5
+    y_offset = random.random()*.5
 
-    # Draw an irregular ellipse (misshapen star)
-    draw.ellipse((x + x_offset, y + y_offset, x + width, y + height), fill=(brightness, brightness, brightness, 255))
+    # Set the fill color for the star
+    draw.fill_color = star_color
 
-# Create the star field image
-star_field_image = create_star_field(num_stars=100, cluster_ratio_range=(0.4, 0.6), num_clusters_range=(3, 6), cluster_size_range=(5, 20), cluster_elongation_range=(1, 4))
-
-# Save the image
-star_field_image.save("star_field.png")
-
-# Optionally, show the image
-star_field_image.show()
+    # Draw the ellipse with the center at (x + x_offset, y + y_offset) and radii (radius_x, radius_y)
+    draw.ellipse((x + x_offset, y + y_offset), (radius_x, radius_y))

@@ -23,4 +23,4 @@ dependencies = [
 "Repository" = "https://github.com/starr-dusT/ftw"
 
 [project.scripts]
-pySVS = "ftw:main"
+ftw = "ftw:main"

@@ -1,40 +1,25 @@
-#from starfield import create_star_field
-#
-## Create the star field image
-#star_field_image = create_star_field(num_stars=100, cluster_ratio_range=(0.7, 0.8), num_clusters_range=(3, 8), cluster_size_range=(5, 10), cluster_elongation_range=(1, 4))
-#
-## Save the image
-#star_field_image.save("star_field.png")
-#
-## Optionally, show the image
-#star_field_image.show()
+from ftw import starfield, blank 
+import importlib.resources as impr
+from wand.image import Image
+from wand.color import Color
+import sys
+import subprocess
 
-#from wand.image import Image
-#from wand.color import Color
-#
-## Load the three images
-#with Image(filename='blank.png') as img1, \
-#     Image(filename='star_field.png') as img2, \
-#     Image(filename='kestrel.png') as img3:
-#
-#    # Find the max dimensions among the three images for the canvas size
-#    max_width = max(img1.width, img2.width, img3.width)
-#    max_height = max(img1.height, img2.height, img3.height)
-#    
-#    # Create an empty canvas with a transparent background, large enough to fit all images
-#    with Image(width=max_width, height=max_height, background=Color('transparent')) as canvas:
-#        
-#        # Composite the first image at the center of the canvas
-#        canvas.composite(img1, left=(max_width - img1.width) // 2, top=(max_height - img1.height) // 2)
-#        
-#        # Composite the second image at the center of the canvas
-#        canvas.composite(img2, left=(max_width - img2.width) // 2, top=(max_height - img2.height) // 2)
-#        
-#        # Composite the third image at the center of the canvas
-#        canvas.composite(img3, left=(max_width - img3.width) // 2, top=(max_height - img3.height) // 2)
-#        
-#        # Save the final result
-#        canvas.save(filename='output_image.png')
+def create_wallpaper(ship_name, bg_color, res=(2560,1440)):
+    bg = blank.create_blank(res, bg_color)
+    stars = starfield.create_star_field(num_stars=300, cluster_ratio_range=(0.5, 0.7), num_clusters_range=(3, 8), cluster_size_range=(5, 10), cluster_elongation_range=(1, 4))
+    resources = impr.files("ftw") / "res"
+    ship = Image(filename=resources / "{}.png".format(ship_name))
+
+    with Image(width=res[0], height=res[1], background=Color('transparent')) as canvas:
+        canvas.composite(bg, left=(res[0] - bg.width) // 2, top=(res[1] - bg.height) // 2)
+        canvas.composite(stars, left=(res[0] - stars.width) // 2, top=(res[1] - stars.height) // 2)
+        canvas.composite(ship, left=(res[0] - ship.width) // 2, top=(res[1] - ship.height) // 2)
+        canvas.save(filename='/tmp/ftw.png')
 
 def main():
-    print("test")
+    if len(sys.argv) != 3:
+        sys.exit(1)
+    create_wallpaper(sys.argv[1], sys.argv[2])
+    subprocess.run(["gsettings","set","org.gnome.desktop.background","picture-uri","file:///tmp/ftw.png"])
+    subprocess.run(["gsettings","set","org.gnome.desktop.background","picture-uri-dark","file:///tmp/ftw.png"])

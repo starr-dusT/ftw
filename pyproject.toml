@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ftw"
+version = "0.0.1"
+authors = [
+  {name = "Tyler Starr", email= "starrtyler88@gmail.com"}
+]
+description = "build custom ftl wallpapers in a complicated way for no reason"
+readme = "README.md"
+requires-python = ">=3.9"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Operating System :: OS Independent"
+]
+dependencies = [
+]
+
+[project.urls]
+"Homepage" = "https://github.com/starr-dusT/ftw"
+"Repository" = "https://github.com/starr-dusT/ftw"
+
+[project.scripts]
+pySVS = "ftw:main"
